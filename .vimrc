@@ -38,6 +38,15 @@ Plug 'junegunn/fzf.vim'                   " Fuzzy finder
 " ============================================================================
 Plug 'sheerun/vim-polyglot'               " Multi-language syntax pack
 
+" ============================================================================
+" Wiki & Markdown
+" ============================================================================
+Plug 'vimwiki/vimwiki'                     " Personal wiki system
+" Alternative markdown preview plugins (choose one):
+Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
+" Fallback option if the above doesn't work:
+" Plug 'instant-markdown/vim-instant-markdown', {'for': 'markdown', 'do': 'yarn install'}
+
 call plug#end()
 
 " ============================================================================
@@ -111,6 +120,50 @@ endif
 " Performance
 set lazyredraw                 " Don't redraw during macros
 set ttyfast                    " Faster terminal connection
+
+" ============================================================================
+" Vimwiki Configuration
+" ============================================================================
+let g:vimwiki_list = [{'path': '~/vimwiki/',
+                      \ 'syntax': 'markdown',
+                      \ 'ext': '.md'}]
+
+" Use markdown syntax for vimwiki
+let g:vimwiki_global_ext = 0
+let g:vimwiki_markdown_link_ext = 1
+
+" ============================================================================
+" Markdown Preview Configuration
+" ============================================================================
+" For markdown-preview.nvim
+let g:mkdp_auto_start = 0
+let g:mkdp_auto_close = 1
+let g:mkdp_refresh_slow = 0
+let g:mkdp_command_for_global = 0
+let g:mkdp_open_to_the_world = 0
+let g:mkdp_open_ip = ''
+let g:mkdp_browser = ''
+let g:mkdp_echo_preview_url = 0
+let g:mkdp_browserfunc = ''
+let g:mkdp_preview_options = {
+    \ 'mkit': {},
+    \ 'katex': {},
+    \ 'uml': {},
+    \ 'maid': {},
+    \ 'disable_sync_scroll': 0,
+    \ 'sync_scroll_type': 'middle',
+    \ 'hide_yaml_meta': 1,
+    \ 'sequence_diagrams': {},
+    \ 'flowchart_diagrams': {},
+    \ 'content_editable': v:false,
+    \ 'disable_filename': 0,
+    \ 'toc': {}
+    \ }
+let g:mkdp_markdown_css = ''
+let g:mkdp_highlight_css = ''
+let g:mkdp_port = ''
+let g:mkdp_page_title = '「${name}」'
+let g:mkdp_filetypes = ['markdown']
 
 " ============================================================================
 " Airline Configuration (Clean tabs and status)
@@ -198,6 +251,9 @@ nnoremap <S-Tab> :bprevious<CR>
 nnoremap <leader>x :bdelete<CR>
 nnoremap <leader>X :bufdo bd<CR>
 
+" Close current tab/buffer (alternative shortcut)
+nnoremap <C-w> :bdelete<CR>
+
 " Buffer selection with airline tabline numbers
 nmap <leader>1 <Plug>AirlineSelectTab1
 nmap <leader>2 <Plug>AirlineSelectTab2
@@ -213,6 +269,16 @@ nmap <leader>9 <Plug>AirlineSelectTab9
 nnoremap <C-p> :Files<CR>
 nnoremap <C-f> :Rg<CR>
 nnoremap <leader>b :Buffers<CR>
+
+" Vimwiki shortcuts
+nnoremap <leader>ww :VimwikiIndex<CR>
+nnoremap <leader>wt :VimwikiTabIndex<CR>
+nnoremap <leader>ws :VimwikiUISelect<CR>
+
+" Markdown Preview shortcuts
+nnoremap <leader>mp :MarkdownPreview<CR>
+nnoremap <leader>ms :MarkdownPreviewStop<CR>
+nnoremap <leader>mt :MarkdownPreviewToggle<CR>
 
 " Split navigation
 nnoremap <C-h> <C-w>h
@@ -239,21 +305,6 @@ nnoremap <leader>gp :Git push<CR>
 " Copy/Paste Functionality (Ctrl+C / Ctrl+V)
 " ============================================================================
 
-" Visual mode: Ctrl+C to copy selection to system clipboard
-vnoremap <C-c> "+y
-
-" Normal mode: Ctrl+C to copy current line to system clipboard
-nnoremap <C-c> "+yy
-
-" Insert mode: Ctrl+V to paste from system clipboard
-inoremap <C-v> <C-r>+
-
-" Normal mode: Ctrl+V to paste from system clipboard
-nnoremap <C-v> "+p
-
-" Visual mode: Ctrl+V to paste and replace selection
-vnoremap <C-v> "+p
-
 " Command mode: Ctrl+V to paste from system clipboard
 cnoremap <C-v> <C-r>+
 
@@ -268,6 +319,83 @@ inoremap <C-s> <Esc>:w<CR>a
 
 " Ctrl+Z to undo (insert mode)
 inoremap <C-z> <C-o>u
+
+" ============================================================================
+" Shift+Arrow Text Selection (Insert Mode)
+" ============================================================================
+
+" Start visual selection with Shift+Arrow keys in insert mode
+inoremap <S-Left> <C-o>v<Left>
+inoremap <S-Right> <C-o>v<Right>
+inoremap <S-Up> <C-o>v<Up>
+inoremap <S-Down> <C-o>v<Down>
+
+" Extend selection with Shift+Arrow keys in visual mode
+vnoremap <S-Left> <Left>
+vnoremap <S-Right> <Right>
+vnoremap <S-Up> <Up>
+vnoremap <S-Down> <Down>
+
+" Shift+Ctrl+Arrow for word-wise selection in insert mode
+inoremap <S-C-Left> <C-o>v<C-Left>
+inoremap <S-C-Right> <C-o>v<C-Right>
+
+" Extend word-wise selection in visual mode
+vnoremap <S-C-Left> <C-Left>
+vnoremap <S-C-Right> <C-Right>
+
+" Shift+Home/End for line selection in insert mode
+inoremap <S-Home> <C-o>v<Home>
+inoremap <S-End> <C-o>v<End>
+
+" Extend to line start/end in visual mode
+vnoremap <S-Home> <Home>
+vnoremap <S-End> <End>
+
+" Shift+Ctrl+Home/End for document selection in insert mode
+inoremap <S-C-Home> <C-o>v<C-Home>
+inoremap <S-C-End> <C-o>v<C-End>
+
+" Extend to document start/end in visual mode
+vnoremap <S-C-Home> <C-Home>
+vnoremap <S-C-End> <C-End>
+
+" ============================================================================
+" Copy/Cut/Paste without feedback messages
+" ============================================================================
+
+" Check if we have clipboard support
+if has('clipboard')
+  " Native clipboard support
+  vmap <C-c> "+y
+  vmap <C-x> "+d
+  vmap <C-v> "+p
+  imap <C-v> <ESC>"+pa
+  nmap <C-c> "+yy
+  nmap <C-v> "+p
+else
+  " Fallback to xclip if available
+  if executable('xclip')
+    " Copy to clipboard using xclip
+    vmap <C-c> y:call system('xclip -i -selection clipboard', @@)<CR>
+    nmap <C-c> yy:call system('xclip -i -selection clipboard', @@)<CR>
+
+    " Cut to clipboard using xclip
+    vmap <C-x> x:call system('xclip -i -selection clipboard', @@)<CR>
+
+    " Paste from clipboard using xclip
+    nmap <C-v> :let @@ = system('xclip -o -selection clipboard')<CR>p
+    imap <C-v> <ESC>:let @@ = system('xclip -o -selection clipboard')<CR>pa
+    vmap <C-v> x:let @@ = system('xclip -o -selection clipboard')<CR>p
+  else
+    " No clipboard support available
+    echo "No clipboard support. Install vim-gtk3 or xclip"
+  endif
+endif
+
+" Delete key to delete selection and return to insert mode
+vnoremap <Del> d<Esc>i
+vnoremap <BS> d<Esc>i
 
 " Make sure we have system clipboard support
 if has('clipboard')
@@ -421,12 +549,17 @@ function! StartScreen()
         \ '                            ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀',
         \ '',
         \ '                                    Quick Start:',
-        \ '                              Ctrl+n    File Explorer',
-        \ '                              Ctrl+p    Find Files',
-        \ '                              Ctrl+c    Copy',
-        \ '                              Ctrl+v    Paste',
-        \ '                              Space+w   Save File',
-        \ '                              Space+q   Quit',
+        \ '                              Ctrl+n     File Explorer',
+        \ '                              Ctrl+p     Find Files',
+        \ '                              Ctrl+w     Close Tab',
+        \ '                              Shift+← →   Select Text',
+        \ '                              Ctrl+C     Copy',
+        \ '                              Ctrl+X     Cut',
+        \ '                              Ctrl+V     Paste',
+        \ '                              Space+ww   Vimwiki Index',
+        \ '                              Space+mp   Markdown Preview',
+        \ '                              Space+w    Save File',
+        \ '                              Space+q    Quit',
         \ '',
         \ '                           Press any key to start coding...',
         \ ''
